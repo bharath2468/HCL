@@ -6,9 +6,11 @@ const API_URL = 'http://localhost:5000/api/auth'; // Adjust the URL based on you
 const login = async (credentials) => {
   try {
     const response = await axios.post(`${API_URL}/login`, credentials);
+    console.log(response)
     if (response.data.token) {
       localStorage.setItem('user', JSON.stringify(response.data));
     }
+    console.log(response)
     return response.data;
   } catch (error) {
     throw new Error('Login failed');

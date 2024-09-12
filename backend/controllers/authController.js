@@ -46,22 +46,15 @@ exports.registerUser = async (req, res) => {
 // @access  Public
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     const isMatch = await user.matchPassword(password);
-
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    if (!user.isVerified) {
-      return res.status(400).json({ message: 'Please verify your email first' });
     }
 
     res.json({
