@@ -5,11 +5,13 @@ import { useNavigate } from 'react-router-dom';
 const Signup = () => {
   const [formData, setFormData] = useState({
     name: '',
+    address: ',',
+    contact: '',
     email: '',
     password: '',
   });
 
-  const { name, email, password } = formData;
+  const { name, address, contact, email, password } = formData;
   const navigate = useNavigate();
 
   const onChange = (e) => {
@@ -24,6 +26,7 @@ const Signup = () => {
       alert('User registered successfully!');
       navigate('/login');
     } catch (error) {
+      console.log(error)
       alert('Error registering user!');
     }
   };
@@ -37,6 +40,20 @@ const Signup = () => {
           name="name"
           value={name}
           placeholder="Name"
+          onChange={onChange}
+        />
+        <input
+          type="text"
+          name="address"
+          value={address}
+          placeholder="address"
+          onChange={onChange}
+        />
+        <input
+          type="number"
+          name="contact"
+          value={contact}
+          placeholder="contact"
           onChange={onChange}
         />
         <input

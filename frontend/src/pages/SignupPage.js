@@ -5,8 +5,8 @@ import { register } from '../services/authService';
 const SignupPage = () => {
   const handleSignup = async (formData) => {
     try {
-      const { name, email, password } = formData;
-      await register(name, email, password);
+      const { name, address, contact,  email, password } = formData;
+      await register(name,address, contact,  email, password);
       alert('Signup successful! You can now login.');
     } catch (error) {
       console.error(error);

@@ -1,31 +1,24 @@
 /* Wrapper for dashboard */
-.dashboard-wrapper {
+.dashboard-container {
     display: flex;
     flex-direction: column;
     height: 100vh;
     width: 100vw;
     overflow: hidden;
-  }
-  
-  /* Container for LeftPanel and content */
-  .panel-container {
-    display: flex;
-    transition: all 0.3s ease;
-    position: relative; /* To manage the position of child elements */
-    width: 100%;
+    background-color: #F0F2FA;
   }
   
   /* LeftPanel styling */
   .LeftPanel {
-    width: 250px; /* Fixed width of the LeftPanel */
+    width: 220px; /* Fixed width of the LeftPanel */
     background-color: #f4f4f4;
     height: 100vh; /* Full viewport height */
-    position: fixed; /* Fixed so it doesn't take up space in the layout */
+    position: relative; /* Fixed so it doesn't take up space in the layout */
     top: 0;
     left: 0;
-    transition: transform 0.3s ease; /* Smooth slide-in/out effect */
+    transition: transform 0.8s ease; /* Smooth slide-in/out effect */
     z-index: 10; /* Make sure it sits on top */
-  }
+    }
   
   /* If the panel is closed, it slides out of view */
   .LeftPanel.closed {
@@ -39,20 +32,22 @@
   
   /* Content of the dashboard */
   .dashboard-content {
+    display: flex;
     flex: 1; /* Take up the remaining space */
-    padding: 20px;
-    transition: margin-left 0.3s ease; /* Smooth shift when the LeftPanel is toggled */
-    background-color: #fff;
-    z-index: 1; /* Keep it above other layers */
-    position: relative;
+    flex-direction: column;
+    position:relative;
+    padding:0;
+    width: 100%;  
+    transition: margin-left 0.5s ease; /* Smooth shift when the LeftPanel is toggled */
+    overflow: hidden;
   }
   
   /* Shift the content when the LeftPanel is open */
-  .left-panel-open .dashboard-content {
-    margin-left: 250px; /* Match the LeftPanel width */
+  .dashboard-container.left-panel-open .dashboard-content {
+    margin-left: 230px; /* Match the LeftPanel width */
   }
   
-  .dashboard-content {
+  .dashboard-container.left-panel-closed .dashboard-content {
     margin-left: 0; /* When the panel is closed, content should fill the space */
   }
   

@@ -13,7 +13,7 @@ const Header = ({ toggleLeftPanel }) => {
         <div class="hamburger" id="hamburger" onClick={toggleLeftPanel}>
             &#9776;
         </div>
-        <h2>Hospital Record System</h2>
+        <h2 className='title-head'>Hospital Record System</h2>
         <a className='a' href="#">About</a>
         <a className='a' href="#">About</a>
         <a className='a' href="#">About</a>

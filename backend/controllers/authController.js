@@ -11,7 +11,7 @@ const generateToken = (id) => {
 // @route   POST /api/auth/signup
 // @access  Public
 exports.registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, address, contact, email, password } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
@@ -22,6 +22,8 @@ exports.registerUser = async (req, res) => {
 
     const user = await User.create({
       name,
+      address,
+      contact,
       email,
       password,
     });
@@ -30,6 +32,8 @@ exports.registerUser = async (req, res) => {
       res.status(201).json({
         _id: user._id,
         name: user.name,
+        address:user.address,
+        contact:user.contact,
         email: user.email,
         token: generateToken(user._id),
       });
@@ -48,6 +52,7 @@ exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
+    console.log(user)
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -58,7 +63,11 @@ exports.loginUser = async (req, res) => {
     }
 
     res.json({
-      token: generateToken(user._id),
+      name: user.name,
+      address:user.address,
+      contact:user.contact,
+      email: user.email,
+      token: generateToken(user._id)
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
