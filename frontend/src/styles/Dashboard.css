@@ -40,6 +40,7 @@
     width: 100%;  
     transition: margin-left 0.5s ease; /* Smooth shift when the LeftPanel is toggled */
     overflow: hidden;
+    overflow-y: auto;
   }
   
   /* Shift the content when the LeftPanel is open */
@@ -48,6 +49,6 @@
   }
   
   .dashboard-container.left-panel-closed .dashboard-content {
-    margin-left: 0; /* When the panel is closed, content should fill the space */
+    margin-left: 10px; /* When the panel is closed, content should fill the space */
   }
   
