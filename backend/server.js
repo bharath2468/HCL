@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const modelRoutes = require('./routes/modelRoutes')
 const cors = require('cors');
 
 // Load environment variables
@@ -18,6 +19,7 @@ connectDB();
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api', modelRoutes);
 
 // Define a test route (optional)
 app.get('/', (req, res) => {

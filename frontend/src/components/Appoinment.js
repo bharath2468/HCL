@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { getDoctorAvailability, getAvailableDoctors } from './availability';
+import { getDoctorAvailability, getAvailableDoctors, getPatient, bookAppointment} from './availability';  // Assuming these are your API functions
 import '../styles/Appointment.css';
+
+const demoPatients = await getPatient();
+console.log(demoPatients)
 
 const Appointment = () => {
   const [selectedDoctor, setSelectedDoctor] = useState('');
@@ -11,13 +14,8 @@ const Appointment = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('');
-  const [patientType, setPatientType] = useState('existing'); // new state for patient type
   const [patientId, setPatientId] = useState('');
-  const [newPatientData, setNewPatientData] = useState({
-    name: '',
-    email: '',
-    phone: ''
-  });
+  const [matchingPatients, setMatchingPatients] = useState([]);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -30,33 +28,88 @@ const Appointment = () => {
   useEffect(() => {
     if (selectedDoctor) {
       const fetchAvailability = async () => {
-        const availability = await getDoctorAvailability(selectedDoctor);
-        const dates = Object.keys(availability).map((dateStr) => new Date(dateStr));
-        setAvailableDates(dates);
+        try {
+          // Fetch the availability data for the selected doctor
+          const { schedule } = await getDoctorAvailability(selectedDoctor);
+    
+          // Extract dates from the schedule array
+          const dates = schedule.map(entry => new Date(entry.date).toDateString());
+    
+          // Set the available dates in your state
+          setAvailableDates(dates);
+        } catch (error) {
+          console.error("Failed to fetch doctor availability", error);
+          // Optionally handle the error, e.g., set an error state
+        }
       };
+    
       fetchAvailability();
     }
   }, [selectedDoctor]);
-
+  
   useEffect(() => {
     if (selectedDoctor && selectedDate) {
       const fetchTimeSlots = async () => {
-        const availability = await getDoctorAvailability(selectedDoctor);
-        const dateStr = selectedDate.toISOString().split('T')[0];
-        setAvailableTimeSlots(availability[dateStr] || []);
+        try {
+          // Fetch the availability data for the selected doctor
+          const { schedule } = await getDoctorAvailability(selectedDoctor);
+    
+          // Format the selectedDate to match the format in the schedule array
+          const dateStr = selectedDate.toISOString().split('T')[0];
+          console.log(dateStr)
+          // Find the schedule entry that matches the selectedDate
+          const entry = schedule.find((item) => {
+            const itemDate = new Date(item.date).toISOString().split('T')[0];
+            return itemDate === dateStr;
+          });
+    
+          // Set the time slots for the selected date, or an empty array if no match
+          setAvailableTimeSlots(entry ? entry.timeSlots : []);
+        } catch (error) {
+          console.error("Failed to fetch time slots", error);
+          // Optionally handle the error, e.g., set an error state
+        }
       };
+    
       fetchTimeSlots();
     }
+    
   }, [selectedDoctor, selectedDate]);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const fetchMatchingPatients = () => {
+      setMatchingPatients(demoPatients);
+      console.log(matchingPatients)
+
+      const lowerCasePatientId = patientId.toLowerCase();
+      const filteredPatients = demoPatients.filter(patient =>
+        `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(lowerCasePatientId)
+      );
+      setMatchingPatients(filteredPatients);
+    };
+
+    fetchMatchingPatients();
+  }, [patientId]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Appointment booked:', {
-      doctor: selectedDoctor,
-      date: selectedDate,
-      timeSlot: selectedTimeSlot,
-      patient: patientType === 'existing' ? { id: patientId } : newPatientData
-    });
+
+    try {
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const appointmentData = {'doctorId':selectedDoctor,'date':dateStr,'timeSlotId': selectedTimeSlot}
+      // Book the appointment
+      const appointmentResponse = await bookAppointment(appointmentData);
+      
+
+      if (appointmentResponse) {
+        alert('Appointment booked successfully!');
+      } else {
+        throw new Error('Failed to book appointment');
+      }
+    } catch (error) {
+      console.error('Error booking appointment:', error);
+      alert('There was an error booking the appointment. Please try again.');
+    }
   };
 
   return (
@@ -64,76 +117,23 @@ const Appointment = () => {
       <h2>Book an Appointment</h2>
 
       <div className="form-group">
-        <label>Patient Type:</label>
-        <div className="patient-type">
-            <label>
-                <input
-                    type="radio"
-                    value="new"
-                    checked={patientType === 'new'}
-                    onChange={() => setPatientType('new')}
-                />
-                New Patient
-            </label>
-            <label>
-                <input
-                    type="radio"
-                    value="existing"
-                    checked={patientType === 'existing'}
-                    onChange={() => setPatientType('existing')}
-                />
-                Existing Patient
-            </label>
-        </div>
+        <label htmlFor="patientId">Patient ID:</label>
+        <input
+          id="patientId"
+          type="text"
+          value={patientId}
+          onChange={(e) => setPatientId(e.target.value)}
+          list="patients"
+          required
+        />
+        <datalist id="patients">
+          {matchingPatients.map(patient => (
+            <option key={patient._id} value={`${patient.firstName} ${patient.lastName}`}>
+              {patient.firstName} {patient.lastName}
+            </option>
+          ))}
+        </datalist>
       </div>
-
-      {patientType === 'existing' ? (
-        <div className="form-group">
-          <label htmlFor="patientId">Patient ID:</label>
-          <input
-            id="patientId"
-            type="text"
-            value={patientId}
-            onChange={(e) => setPatientId(e.target.value)}
-            required
-          />
-        </div>
-      ) : (
-        <>
-          <div className="form-group">
-            <label htmlFor="name">Full Name:</label>
-            <input
-              id="name"
-              type="text"
-              value={newPatientData.name}
-              onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="email">Email:</label>
-            <input
-              id="email"
-              type="email"
-              value={newPatientData.email}
-              onChange={(e) => setNewPatientData({ ...newPatientData, email: e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="phone">Phone Number:</label>
-            <input
-              id="phone"
-              type="tel"
-              value={newPatientData.phone}
-              onChange={(e) => setNewPatientData({ ...newPatientData, phone: e.target.value })}
-              required
-            />
-          </div>
-        </>
-      )}
 
       <div className="form-group">
         <label htmlFor="doctor">Select Doctor:</label>
@@ -160,22 +160,30 @@ const Appointment = () => {
       </div>
 
       <div className="form-group">
-        <label htmlFor="time">Select Time Slot:</label>
-        <select
-          id="time"
-          value={selectedTimeSlot}
-          onChange={(e) => setSelectedTimeSlot(e.target.value)}
-          required
-          disabled={!selectedDate}
-        >
-          <option value="">-- Select a time slot --</option>
-          {availableTimeSlots.map((slot) => (
-            <option key={slot} value={slot}>
-              {slot}
+      <label htmlFor="time">Select Time Slot:</label>
+      <select
+        id="time"
+        value={selectedTimeSlot}
+        onChange={(e) => setSelectedTimeSlot(e.target.value)}
+        required
+        disabled={!selectedDate || availableTimeSlots.length === 0}
+      >
+        <option value="" disabled>
+          -- Select a time slot --
+        </option>
+        {availableTimeSlots.length > 0 ? (
+          availableTimeSlots.map((slot) => (
+            <option key={slot._id} value={slot._id}>
+              {slot.time} - {slot.status}
             </option>
-          ))}
-        </select>
-      </div>
+          ))
+        ) : (
+          <option value="" disabled>
+            No time slots available
+          </option>
+        )}
+      </select>
+    </div>
 
       <button type="submit" disabled={!selectedDoctor || !selectedDate || !selectedTimeSlot}>
         Book Appointment

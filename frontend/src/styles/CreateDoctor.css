@@ -1,0 +1,41 @@
+/* AddDoctorForm.css */
+.add-doctor-form {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .add-doctor-form h2 {
+    margin-bottom: 20px;
+  }
+  
+  .add-doctor-form div {
+    margin-bottom: 15px;
+  }
+  
+  .add-doctor-form label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .add-doctor-form input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  .add-doctor-form button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .add-doctor-form button:hover {
+    background-color: #0056b3;
+  }
+  

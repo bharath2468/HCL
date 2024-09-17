@@ -4,6 +4,8 @@ import Header from '../components/Header';
 import LeftPanel from '../components/LeftPanel';
 import HospitalDetails from '../components/HospitalDetails';
 import Appointment from '../components/Appoinment';
+import AddDoctorForm from '../components/CreateDoctor';
+import AddPatient from '../components/CreatePatient';
 import '../styles/Dashboard.css'
 
 const Dashboard = () => {
@@ -20,6 +22,10 @@ const Dashboard = () => {
     content = <HospitalDetails />;
   } else if(iscontent === "appointment"){
     content = <Appointment />
+  } else if(iscontent === "doctor"){
+    content = <AddDoctorForm />
+  } else if(iscontent === "patient"){
+    content = <AddPatient />
   }
   console.log(iscontent)
 
