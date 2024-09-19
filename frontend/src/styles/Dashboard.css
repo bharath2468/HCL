@@ -6,6 +6,7 @@
     width: 100vw;
     overflow: hidden;
     background-color: #F0F2FA;
+    
   }
   
   /* LeftPanel styling */
@@ -39,13 +40,15 @@
     padding:0;
     width: 100%;  
     transition: margin-left 0.5s ease; /* Smooth shift when the LeftPanel is toggled */
-    overflow: hidden;
     overflow-y: auto;
+    max-height: 100vh;
+    align-items: center;
   }
   
   /* Shift the content when the LeftPanel is open */
   .dashboard-container.left-panel-open .dashboard-content {
     margin-left: 230px; /* Match the LeftPanel width */
+    align-items: start;
   }
   
   .dashboard-container.left-panel-closed .dashboard-content {

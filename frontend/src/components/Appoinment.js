@@ -5,7 +5,6 @@ import { getDoctorAvailability, getAvailableDoctors, getPatient, bookAppointment
 import '../styles/Appointment.css';
 
 const demoPatients = await getPatient();
-console.log(demoPatients)
 
 const Appointment = () => {
   const [selectedDoctor, setSelectedDoctor] = useState('');
@@ -80,29 +79,57 @@ const Appointment = () => {
     const fetchMatchingPatients = () => {
       setMatchingPatients(demoPatients);
       console.log(matchingPatients)
-
+      const patientName = `${patientId.firstName} ${patientId.lastname}`;
+      console.log(patientName)
       const lowerCasePatientId = patientId.toLowerCase();
       const filteredPatients = demoPatients.filter(patient =>
         `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(lowerCasePatientId)
       );
+      console.log(filteredPatients)
       setMatchingPatients(filteredPatients);
     };
 
     fetchMatchingPatients();
   }, [patientId]);
 
+  const handlePatientSelection = (e) => {
+    const selectedName = e.target.value; // Get the selected patient name
+
+    // Find the patient object based on the selected name
+    const patient = matchingPatients.find(patient => 
+      `${patient.firstName} ${patient.lastName}` === selectedName
+    );
+
+    // If the patient is found, set the full patient details
+    if (patient) {
+      //console.log(patient)
+      setPatientId(patient); // Store the selected patient details
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const dateStr = selectedDate.toISOString().split('T')[0];
-      const appointmentData = {'doctorId':selectedDoctor,'date':dateStr,'timeSlotId': selectedTimeSlot}
+      const lowerCaseSearchName = patientId.toLowerCase();
+      const patient = demoPatients.find(patient => {
+        const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+        return fullName === lowerCaseSearchName; // Exact match
+      });
+
+      const appointmentData = {'patientId':patient ? patient._id : null, 'doctorId':selectedDoctor,'date':dateStr,'timeSlotId': selectedTimeSlot}
       // Book the appointment
       const appointmentResponse = await bookAppointment(appointmentData);
       
 
       if (appointmentResponse) {
         alert('Appointment booked successfully!');
+        // Clear the form inputs by resetting the state
+        setPatientId('');
+        setSelectedDoctor('');
+        setSelectedDate(null);  // DatePicker expects a Date object or null
+        setSelectedTimeSlot('');
       } else {
         throw new Error('Failed to book appointment');
       }
@@ -122,7 +149,7 @@ const Appointment = () => {
           id="patientId"
           type="text"
           value={patientId}
-          onChange={(e) => setPatientId(e.target.value)}
+          onChange={(e)=>setPatientId(e.target.value)}
           list="patients"
           required
         />

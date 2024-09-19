@@ -1,15 +1,14 @@
 /* styles.css */
 .appointment-form {
-    max-width: 80%;
+    max-width: 85%;
     padding: 20px;
     margin: 15px;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    
+    width: 80%;
     /* Make form scrollable if content exceeds height */
-    max-height: 80vh; /* Adjust as needed */
-    overflow-y:scroll;
+    max-height: 100vh; /* Adjust as needed */
 }
 
 .appointment-form h2 {

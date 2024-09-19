@@ -4,21 +4,20 @@ const express = require('express');
 const router = express.Router();
 const Doctor = require('../models/Doctor'); // Import your Doctor model
 const Appointment = require('../models/Appointment'); // Import your Appointment model
+const Patient = require('../models/Patient');
+const nodemailer = require('nodemailer');
 
 //Updating the Booking
 router.post('/book', async (req, res) => {
-  console.log("1")
   console.log('Updating appointment with data:', req.body);
   try {
-    const { doctorId, date, timeSlotId } = req.body;
-    console.log(req.body)
+    const { patientId, doctorId, date, timeSlotId } = req.body;
 
-    if (!doctorId || !date || !timeSlotId) {
+    if (!patientId || !doctorId || !date || !timeSlotId) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
     const doctor = await Doctor.findById(doctorId);
-    console.log(doctor)
     if (!doctor) {
       return res.status(404).json({ message: 'Doctor not found' });
     }
@@ -35,6 +34,52 @@ router.post('/book', async (req, res) => {
 
     timeSlot.status = 'Booked';
     await doctor.save();
+
+    // Create a new appointment object using the request data
+    const newAppointment = new Appointment({
+      patientId,
+      doctorId,
+      date,
+      timeSlot
+    });
+    const bookingdate = new Date(date).toISOString().split('T')[0]
+    const bookingtime = timeSlot.time;
+
+    // Save the appointment to the database
+    const savedAppointment = await newAppointment.save();
+    const bookingId = savedAppointment._id;
+
+    //Send confirmation Mail
+    const patient = await Patient.findById(patientId);
+    const patientMail = patient.email;
+
+    async function sendEmail(patientMail, bookingId, date, time) {
+      // Create a transporter
+      const transporter = nodemailer.createTransport({
+          service: 'Gmail', // or another service
+          auth: {
+              user: 'bh3214321@gmail.com', // Your email
+              pass: "cisy ailr uooy hlkd" // Your email password or app-specific password
+          }
+      });
+  
+      // Set email options
+      const mailOptions = {
+          from: 'bh3214321@gmail.com',
+          to: `${patientMail}`,
+          subject: 'Confirmation of Hospital Appointment',
+          text: `Thanks! for booking an appointment with us, here are your appointment details\n\tBooking ID : ${bookingId}\n\tDate : ${date}\n\tTime : ${time}\n Best Regards,\nHospital Management System`
+      };
+    
+      try {
+          const info = await transporter.sendMail(mailOptions);
+          console.log('Email sent: ' + info.response);
+      } catch (error) {
+          console.error('Error sending email:', error);
+      }
+  }
+  
+  sendEmail(patientMail, bookingId, bookingdate, bookingtime);
 
     console.log('Time slot booked successfully');
     res.status(200).json({ message: 'Time slot booked successfully' });
