@@ -30,6 +30,7 @@ const Appointment = () => {
         try {
           // Fetch the availability data for the selected doctor
           const { schedule } = await getDoctorAvailability(selectedDoctor);
+          console.log(schedule)
     
           // Extract dates from the schedule array
           const dates = schedule.map(entry => new Date(entry.date).toDateString());
@@ -54,7 +55,8 @@ const Appointment = () => {
           const { schedule } = await getDoctorAvailability(selectedDoctor);
     
           // Format the selectedDate to match the format in the schedule array
-          const dateStr = selectedDate.toISOString().split('T')[0];
+          console.log(selectedDate)
+          const dateStr = selectedDate.toLocaleDateString('en-CA');
           console.log(dateStr)
           // Find the schedule entry that matches the selectedDate
           const entry = schedule.find((item) => {
@@ -153,13 +155,13 @@ const Appointment = () => {
           list="patients"
           required
         />
-        <datalist id="patients">
+        {/* <select id="patients" value="">
           {matchingPatients.map(patient => (
             <option key={patient._id} value={`${patient.firstName} ${patient.lastName}`}>
               {patient.firstName} {patient.lastName}
             </option>
           ))}
-        </datalist>
+        </select> */}
       </div>
 
       <div className="form-group">

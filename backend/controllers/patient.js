@@ -19,7 +19,6 @@ router.post('/create', async (req, res) => {
 router.get('/get', async (req, res) => {
   try {
     const patients = await Patient.find();
-    console.log(patients)
     res.status(200).json(patients);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching patients' });

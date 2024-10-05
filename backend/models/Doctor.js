@@ -93,6 +93,29 @@ doctorSchema.pre('save', function(next) {
   next();
 });
 
+//methos to get the schedules of doctor
+doctorSchema.methods.getDoctorDetailsWithUpcomingSchedule = function() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);  // Set time to midnight for date comparison
+
+  // Filter the schedule for dates from today onwards
+  const upcomingSchedule = this.schedule.filter(schedule => {
+    return schedule.date >= today;
+  });
+
+  // Return the entire doctor object, including the filtered schedule
+  return {
+    _id: this._id,
+    firstName: this.firstName,
+    lastName: this.lastName,
+    specialization: this.specialization,
+    contactNumber: this.contactNumber,
+    email: this.email,
+    schedule: upcomingSchedule,  // Only the upcoming schedule
+    createdAt: this.createdAt
+  };
+};
+
 // Define a method to get availability
 doctorSchema.methods.getAvailableSlots = function() {
   return {

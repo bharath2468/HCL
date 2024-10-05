@@ -38,7 +38,8 @@ router.get('/get', async (req, res) => {
 // Get doctor by ID
 router.get('/:id/availability', async (req, res) => {
   try {
-    const doctor = await Doctor.findById(req.params.id);
+    const doc = await Doctor.findById(req.params.id);
+    const doctor = doc.getDoctorDetailsWithUpcomingSchedule();
     if (!doctor) {
       return res.status(404).json({ error: 'Doctor not found' });
     }
