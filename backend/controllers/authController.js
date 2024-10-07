@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Doctor = require('../models/Doctor');
 const jwt = require('jsonwebtoken');
 
 const generateToken = (id) => {
@@ -49,9 +50,10 @@ exports.registerUser = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 exports.loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
   try {
-    const user = await User.findOne({ email });
+    if (role === 'admin'){
+      const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -68,7 +70,29 @@ exports.loginUser = async (req, res) => {
       email: user.email,
       token: generateToken(user._id)
     });
+    }
+    else {
+      const doctor = await Doctor.findOne({ email });
+      hospitalemail = doctor.hospitalEmail;
+      const user = await User.findOne({ email:hospitalemail });
+      if (doctor.password===password){
+        // Send response with user data and token
+        console.log(6)
+      res.json({user:{name: user.name,
+        address:user.address,
+        contact:user.contact,
+        email: user.email,
+        token: generateToken(user._id)},
+        doctor:{firstname: doctor.firstName,
+          lastname: doctor.lastName,
+          contact: doctor.contactNumber,
+          email: doctor.email,
+          token: generateToken(doctor._id)}
+    });
+      }
+    }
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 };

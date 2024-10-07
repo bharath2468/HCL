@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import '../styles/CreateDoctor.css'
+import '../styles/CreateDoctor.css';
+import authService from '../services/authService';
 
 const AddDoctorForm = () => {
   // State to hold the form data
+  console.log(authService.getCurrentUser());
   const [formData, setFormData] = useState({
+    hospitalEmail: authService.getCurrentUser().email,
     firstName: '',
     lastName: '',
     specialization: '',
@@ -33,6 +36,7 @@ const AddDoctorForm = () => {
         alert('Doctor added successfully!');
         // Optionally, clear the form or redirect the user
         setFormData({
+          hospitalEmail: '',
           firstName: '',
           lastName: '',
           specialization: '',

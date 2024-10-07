@@ -24,6 +24,10 @@ const dailyScheduleSchema = new mongoose.Schema({
 
 // Doctor schema with schedule
 const doctorSchema = new mongoose.Schema({
+  hospitalEmail: {
+    type: String,
+    required: true
+  },
   firstName: {
     type: String,
     required: true
@@ -41,6 +45,10 @@ const doctorSchema = new mongoose.Schema({
     required: true
   },
   email: {
+    type: String,
+    required: true
+  },
+  password: {
     type: String,
     required: true
   },

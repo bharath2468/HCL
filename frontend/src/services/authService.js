@@ -5,12 +5,22 @@ const API_URL = 'http://localhost:5000/api'; // Adjust the URL based on your bac
 // Login function
 const login = async (credentials) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, credentials);
-    if (response.data.token) {
-      localStorage.setItem('user', JSON.stringify(response.data));
+    if (credentials.role==='admin'){
+      const response = await axios.post(`${API_URL}/auth/login`, credentials);
+      if (response.data.token) {
+        localStorage.setItem('user', JSON.stringify(response.data));
+      }
+      return response.data;
     }
-    console.log(response.data);
-    return response.data;
+    else{
+      const response = await axios.post(`${API_URL}/auth/login`, credentials);
+      console.log(response.data)
+      if (response.data) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem('doctor', JSON.stringify(response.data.doctor));
+      }
+      return response.data;
+    }
   } catch (error) {
     throw new Error('Login failed');
   }
@@ -31,11 +41,17 @@ const signup = async (userData) => {
 // Logout function
 const logout = () => {
   localStorage.removeItem('user');
+  localStorage.removeItem('doctor');
 };
 
 // Get current user
 const getCurrentUser = () => {
   return JSON.parse(localStorage.getItem('user'));
+};
+
+// Get current doctor
+const getCurrentDoctor = () => {
+  return JSON.parse(localStorage.getItem('doctor'));
 };
 
 // Create patient function
@@ -85,6 +101,7 @@ const authService = {
   signup,
   logout,
   getCurrentUser,
+  getCurrentDoctor,
   createPatient,
   bookAppointment,
   createDoctor,
