@@ -1,7 +1,7 @@
 # HCL
 
 ## Dashboard
-![Dashboard](screenshots\dashboard.png)
+![Dashboard](screenshots/dashboard.png)
 
 ## Add Patient
 ![Add Patient](screenshots\newpatient.png)
