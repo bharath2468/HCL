@@ -29,8 +29,8 @@ return(
         <p className='head'>Menu</p>
         <hr></hr>
         <p className='text'><a href='' onClick={handleClick("dashboard")}>Dashboard</a><p className='arrow'>&#x3E;</p></p>
-        <p className='text'><a href='' onClick={handleClick("patient")}>Patient Details</a><p className='arrow'>&#x3E;</p></p>
-        <p className='text'><a href='' onClick={handleClick("doctor")}>Doctor Details</a><p className='arrow'>&#x3E;</p></p>
+        <p className='text'><a href='' onClick={handleClick("patienthistory")}>PatientHistory</a><p className='arrow'>&#x3E;</p></p>
+        <p className='text'><a href='' onClick={handleClick("doctor")}>Add Patientdetails</a><p className='arrow'>&#x3E;</p></p>
         <p className='text'><a href='' onClick={handleClick("appointment")}>Appointment</a><p className='arrow'>&#x3E;</p></p>
         <p className='text'><a href=''>Billing & Payments</a><p className='arrow'>&#x3E;</p></p>
         <p className='text'><a href=''>History records</a><p className='arrow'>&#x3E;</p></p>

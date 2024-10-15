@@ -11,7 +11,7 @@
   
   /* LeftPanel styling */
   .LeftPanel {
-    width: 220px; /* Fixed width of the LeftPanel */
+    width: 250px; /* Fixed width of the LeftPanel */
     background-color: #f4f4f4;
     height: 100vh; /* Full viewport height */
     position: relative; /* Fixed so it doesn't take up space in the layout */
@@ -47,7 +47,7 @@
   
   /* Shift the content when the LeftPanel is open */
   .dashboard-container.left-panel-open .dashboard-content {
-    margin-left: 230px; /* Match the LeftPanel width */
+    margin-left: 250px; /* Match the LeftPanel width */
     align-items: start;
   }
   

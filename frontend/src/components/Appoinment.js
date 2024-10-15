@@ -5,6 +5,7 @@ import { getDoctorAvailability, getAvailableDoctors, getPatient, bookAppointment
 import '../styles/Appointment.css';
 
 const demoPatients = await getPatient();
+console.log(demoPatients)
 
 const Appointment = () => {
   const [selectedDoctor, setSelectedDoctor] = useState('');
@@ -113,7 +114,7 @@ const Appointment = () => {
     e.preventDefault();
 
     try {
-      const dateStr = selectedDate.toISOString().split('T')[0];
+      const dateStr = selectedDate.toLocaleDateString('en-CA');
       const lowerCaseSearchName = patientId.toLowerCase();
       const patient = demoPatients.find(patient => {
         const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
@@ -122,6 +123,7 @@ const Appointment = () => {
 
       const appointmentData = {'patientId':patient ? patient._id : null, 'doctorId':selectedDoctor,'date':dateStr,'timeSlotId': selectedTimeSlot}
       // Book the appointment
+      console.log(appointmentData)
       const appointmentResponse = await bookAppointment(appointmentData);
       
 
@@ -155,13 +157,13 @@ const Appointment = () => {
           list="patients"
           required
         />
-        {/* <select id="patients" value="">
-          {matchingPatients.map(patient => (
-            <option key={patient._id} value={`${patient.firstName} ${patient.lastName}`}>
-              {patient.firstName} {patient.lastName}
-            </option>
-          ))}
-        </select> */}
+        <datalist id="patients">
+        {matchingPatients.map((patient) => (
+          <option key={patient._id} value={`${patient.firstName} ${patient.lastName}`}>
+            {patient.firstName} {patient.lastName}
+          </option>
+        ))}
+      </datalist>
       </div>
 
       <div className="form-group">

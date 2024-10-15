@@ -7,6 +7,7 @@ import HospitalDetails from '../components/HospitalDetails';
 import Appointment from '../components/Appoinment';
 import AddDoctorForm from '../components/CreateDoctor';
 import AddPatient from '../components/CreatePatient';
+import PatientHistory from '../components/PatientHistory';
 import '../styles/Dashboard.css'
 
 const Dashboard = () => {
@@ -30,6 +31,8 @@ const Dashboard = () => {
     content = <AddDoctorForm />
   } else if(iscontent === "patient"){
     content = <AddPatient />
+  } else if(iscontent === "patienthistory"){
+    content = <PatientHistory />
   }
 
   return (
