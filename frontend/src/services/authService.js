@@ -51,7 +51,16 @@ const getCurrentUser = () => {
 
 // Get current doctor
 const getCurrentDoctor = () => {
-  return JSON.parse(localStorage.getItem('doctor'));
+  const doctorRaw = localStorage.getItem('doctor');
+  console.log('authService.getCurrentDoctor: raw localStorage value:', doctorRaw);
+  try {
+    const doctor = JSON.parse(doctorRaw);
+    console.log('authService.getCurrentDoctor: parsed doctor:', doctor);
+    return doctor;
+  } catch (e) {
+    console.log('authService.getCurrentDoctor: error parsing doctor:', e);
+    return null;
+  }
 };
 
 // Create patient function

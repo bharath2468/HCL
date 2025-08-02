@@ -7,7 +7,6 @@ const HospitalDetails = ({ role }) => {
   const user = authService.getCurrentUser();
   const doctor = authService.getCurrentDoctor();
   const isDoctor = role === 'doctor';
-    console.log(process.env.GEMINI_API);
   return (
     <div className="hospital-container">
       

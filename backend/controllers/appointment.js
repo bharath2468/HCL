@@ -1,11 +1,102 @@
-// appointmentRoutes.js
-
 const express = require('express');
-const router = express.Router();
 const Doctor = require('../models/Doctor'); // Import your Doctor model
 const Appointment = require('../models/Appointment'); // Import your Appointment model
 const Patient = require('../models/Patient');
 const nodemailer = require('nodemailer');
+const router = express.Router();
+router.get('/doctor/schedule/:doctorId', async (req, res) => {
+  try {
+    const doctorId = req.params.doctorId;
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
+    // Collect all appointmentIds from the schedule
+    const appointmentIds = [];
+    doctor.schedule.forEach(day => {
+      day.timeSlots.forEach(slot => {
+        if (slot.appointmentId) {
+          appointmentIds.push(slot.appointmentId);
+        }
+      });
+    });
+    if (appointmentIds.length === 0) {
+      console.log('Doctor schedule appointmentIds: [] (No appointments scheduled)');
+    } else {
+      console.log('Doctor schedule appointmentIds:', appointmentIds);
+    }
+    const appointments = await Appointment.find({ _id: { $in: appointmentIds } }).populate('patientId');
+    if (appointments.length === 0) {
+      console.log('Doctor schedule appointments: [] (No appointments found for these IDs)');
+    } else {
+      console.log('Doctor schedule appointments:', appointments);
+    }
+    res.status(200).json(appointments);
+  } catch (error) {
+    console.error('Error in /doctor/schedule/:doctorId:', error);
+    res.status(500).json({ error: 'Error fetching doctor appointments from schedule', details: error.message });
+  }
+});
+
+// Get all appointments for a specific doctor
+router.get('/doctor/:doctorId', async (req, res) => {
+  try {
+    const doctorId = req.params.doctorId;
+    const appointments = await Appointment.find({ doctorId }).populate('patientId');
+    console.log('Appointments for doctor:', doctorId, appointments);
+    res.status(200).json(appointments);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching doctor appointments' });
+  }
+});
+
+// Get details of a specific appointment
+router.get('/details/:appointmentId', async (req, res) => {
+  try {
+    const appointmentId = req.params.appointmentId;
+    const appointment = await Appointment.findById(appointmentId).populate('patientId doctorId');
+    if (!appointment) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+    res.status(200).json(appointment);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching appointment details' });
+  }
+});
+
+// Update medical diagnosis for a specific appointment
+router.put('/diagnosis/:appointmentId', async (req, res) => {
+  try {
+    const appointmentId = req.params.appointmentId;
+    const { medicalCondition } = req.body;
+    const appointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      { medicalCondition, status: 'attended' },
+      { new: true }
+    );
+    if (!appointment) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+    // Add new medical history entry to Patient
+    const patient = await Patient.findById(appointment.patientId);
+    if (patient) {
+      patient.medicalHistory.push({
+        date: new Date(),
+        medicalCondition
+      });
+      await patient.save();
+    }
+    // Update patient history in Redis
+    const { redisClient } = require('../config/redis');
+    const patientId = appointment.patientId.toString();
+    // Try to get from patient.medicalHistory if not in Redis
+    await redisClient.set(`patient_history:${patientId}`, JSON.stringify(patient.medicalHistory));
+    res.status(200).json(appointment);
+  } catch (error) {
+    res.status(400).json({ error: 'Error updating medical diagnosis' });
+  }
+});
+// ...existing code...
 
 //Updating the Booking
 router.post('/book', async (req, res) => {
@@ -32,22 +123,28 @@ router.post('/book', async (req, res) => {
       return res.status(404).json({ message: 'Time slot not found' });
     }
 
-    timeSlot.status = 'Booked';
-    await doctor.save();
-
     // Create a new appointment object using the request data
     const newAppointment = new Appointment({
       patientId,
       doctorId,
       date,
-      timeSlot
+      timeSlot: {
+        time: timeSlot.time,
+        status: timeSlot.status,
+        appointmentId: timeSlot.appointmentId || null
+      }
     });
-    const bookingdate = new Date(date).toISOString().split('T')[0]
+    const bookingdate = new Date(date).toISOString().split('T')[0];
     const bookingtime = timeSlot.time;
 
     // Save the appointment to the database
     const savedAppointment = await newAppointment.save();
     const bookingId = savedAppointment._id;
+
+    // Add appointmentId to the booked time slot
+    timeSlot.status = 'Booked';
+    timeSlot.appointmentId = bookingId;
+    await doctor.save();
 
     //Send confirmation Mail
     const patient = await Patient.findById(patientId);
@@ -59,7 +156,7 @@ router.post('/book', async (req, res) => {
           service: 'Gmail', // or another service
           auth: {
               user: 'bh3214321@gmail.com', // Your email
-              pass: "cisy ailr uooy hlkd" // Your email password or app-specific password
+              pass: "mbip vqme pnbc wcpb" // Your email password or app-specific password
           }
       });
   
@@ -77,9 +174,8 @@ router.post('/book', async (req, res) => {
       } catch (error) {
           console.error('Error sending email:', error);
       }
-  }
-  
-  sendEmail(patientMail, bookingId, bookingdate, bookingtime);
+    }
+    sendEmail(patientMail, bookingId, bookingdate, bookingtime);
 
     console.log('Time slot booked successfully');
     res.status(200).json({ message: 'Time slot booked successfully' });
@@ -88,18 +184,6 @@ router.post('/book', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
-// Create a new appointment
-router.get('/appointments/hi', async (req, res) => {
-  try {
-    //const newAppointment = new Appointment(req.body);
-    //await newAppointment.save();
-    console.log("3")
-    res.status(200).json({message: "Good luck"});
-  } catch (error) {
-    res.status(400).json({ error: 'Error creating appointment' });
-  }
-}); 
 
 // Get all appointments
 router.get('/appointment', async (req, res) => {
@@ -127,10 +211,24 @@ router.get('/appointments/:id', async (req, res) => {
 // Update an appointment
 router.put('/appointments/:id', async (req, res) => {
   try {
-    const appointment = await Appointment.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updateData = req.body;
+    // Only allow updating medicalCondition, notes, or other allowed fields
+    const allowedFields = ['medicalCondition', 'notes', 'date', 'timeSlot'];
+    const updateFields = {};
+    for (const key of allowedFields) {
+      if (updateData[key] !== undefined) {
+        updateFields[key] = updateData[key];
+      }
+    }
+    const appointment = await Appointment.findByIdAndUpdate(req.params.id, updateFields, { new: true });
     if (!appointment) {
       return res.status(404).json({ error: 'Appointment not found' });
     }
+    // Store updated patient history in Redis
+    const { redisClient } = require('../config/redis');
+    const patientId = appointment.patientId.toString();
+    const allAppointments = await Appointment.find({ patientId });
+    await redisClient.set(`patient_history:${patientId}`, JSON.stringify(allAppointments));
     res.status(200).json(appointment);
   } catch (error) {
     res.status(400).json({ error: 'Error updating appointment' });

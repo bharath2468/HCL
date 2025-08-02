@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import "../styles/Chatbot.css";
 import axios from 'axios';
 
-const Chatbot = () => {
+
+const Chatbot = ({ patientId }) => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [messages, setMessages] = useState([
     { text: "Hi there 👋\nHow can I help you today?", type: "incoming" },
@@ -16,41 +17,40 @@ const Chatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
   };
 
-  const createChatLi = (message, className) => {
-    // Create a chat <li> element with passed message and className
-    const chatLi = document.createElement("li");
-    chatLi.classList.add("chat", `${className}`);
-    let chatContent =
-      className === "outgoing"
-        ? `<p></p>`
-        : `<span class="material-symbols-outlined">Bot</span><p></p>`;
-    chatLi.innerHTML = chatContent;
-    chatLi.querySelector("p").textContent = message;
-    return chatLi; // return chat <li> element
-  };
+  // No longer needed, handled by React state
 
-  const generateResponse = async (chatElement) => {
-    const messageElement = chatElement.querySelector("p");
-
-    // Send POST request to API, get response and set the response as paragraph text
+  const generateResponse = async (userMsg) => {
     const API_URL = 'http://localhost:5000/api/chatbot/generate';
+    // Add "Thinking..." message
+    setMessages(prev => [...prev, { text: "Thinking...", type: "incoming" }]);
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({query:userMessage})
+        body: JSON.stringify({ query: userMsg, patientId })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error.message);
-
-      // Get the API response text and update the message element
-      messageElement.textContent = data.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, "$1");
+      if (!response.ok) throw new Error(data.error?.message || 'Error from chatbot API');
+      // Replace "Thinking..." with actual response
+      setMessages(prev => {
+        const msgs = [...prev];
+        msgs[msgs.length - 1] = {
+          text: data.candidates?.[0]?.content?.parts?.[0]?.text?.replace(/\*\*(.*?)\*\*/g, "$1") || 'No response',
+          type: "incoming"
+        };
+        return msgs;
+      });
     } catch (error) {
-      // Handle error
-      messageElement.classList.add("error");
-      messageElement.textContent = error.message;
+      setMessages(prev => {
+        const msgs = [...prev];
+        msgs[msgs.length - 1] = {
+          text: error.message,
+          type: "incoming"
+        };
+        return msgs;
+      });
     } finally {
       if (chatboxRef.current) {
         chatboxRef.current.scrollTo(0, chatboxRef.current.scrollHeight);
@@ -59,30 +59,20 @@ const Chatbot = () => {
   };
 
   const handleChat = () => {
-    const trimmedMessage = userMessage.trim(); // Get user entered message and remove extra whitespace
+    const trimmedMessage = userMessage.trim();
     if (!trimmedMessage) return;
 
-    // Clear the input textarea and set its height to default
     setUserMessage("");
     const chatInput = chatInputRef.current;
     if (chatInput) {
       chatInput.style.height = `${inputInitHeight.current}px`;
     }
 
-    // Append the user's message to the chatbox
-    if (chatboxRef.current) {
-      chatboxRef.current.appendChild(createChatLi(trimmedMessage, "outgoing"));
-      chatboxRef.current.scrollTo(0, chatboxRef.current.scrollHeight);
-    }
+    // Add user's message to state
+    setMessages(prev => [...prev, { text: trimmedMessage, type: "outgoing" }]);
 
     setTimeout(() => {
-      // Display "Thinking..." message while waiting for the response
-      const incomingChatLi = createChatLi("Thinking...", "incoming");
-      if (chatboxRef.current) {
-        chatboxRef.current.appendChild(incomingChatLi);
-        chatboxRef.current.scrollTo(0, chatboxRef.current.scrollHeight);
-      }
-      generateResponse(incomingChatLi);
+      generateResponse(trimmedMessage);
     }, 600);
   };
 

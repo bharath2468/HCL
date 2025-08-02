@@ -1,18 +1,21 @@
 import React from 'react';
 import '../styles/LeftPanel.css'
 
-function LeftPanel({selected}, {role}){
+function LeftPanel({selected, role}){
     const handleClick = (content) => (e) => {
         e.preventDefault(); // Prevent default anchor behavior
+        console.log('LeftPanel menu clicked:', content);
         selected(content);
       };
     let isdoctor = false;
     if (role==='doctor'){
         isdoctor = true;
     }
+    console.log('LeftPanel role:', role)
+    console.log('LeftPanel isdoctor:', isdoctor)
 return(
     <div>
-        {isdoctor ? 
+        {!isdoctor ? 
         <div className='panel' >
         <p className='head'>Menu</p>
         <hr></hr>
@@ -29,6 +32,7 @@ return(
         <p className='head'>Menu</p>
         <hr></hr>
         <p className='text'><a href='' onClick={handleClick("dashboard")}>Dashboard</a><p className='arrow'>&#x3E;</p></p>
+        <p className='text'><a href='' onClick={handleClick("doctorappointments")}>My Appointments</a><p className='arrow'>&#x3E;</p></p>
         <p className='text'><a href='' onClick={handleClick("patienthistory")}>PatientHistory</a><p className='arrow'>&#x3E;</p></p>
         <p className='text'><a href='' onClick={handleClick("doctor")}>Add Patientdetails</a><p className='arrow'>&#x3E;</p></p>
         <p className='text'><a href='' onClick={handleClick("appointment")}>Appointment</a><p className='arrow'>&#x3E;</p></p>

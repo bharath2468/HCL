@@ -83,12 +83,15 @@ exports.loginUser = async (req, res) => {
         contact:user.contact,
         email: user.email,
         token: generateToken(user._id)},
-        doctor:{firstname: doctor.firstName,
+        doctor:{
+          _id: doctor._id,
+          firstname: doctor.firstName,
           lastname: doctor.lastName,
           contact: doctor.contactNumber,
           email: doctor.email,
-          token: generateToken(doctor._id)}
-    });
+          token: generateToken(doctor._id)
+        }
+      });
       }
     }
   } catch (error) {

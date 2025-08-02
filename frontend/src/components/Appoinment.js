@@ -16,6 +16,7 @@ const Appointment = () => {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('');
   const [patientId, setPatientId] = useState('');
   const [matchingPatients, setMatchingPatients] = useState([]);
+  const [medicalCondition, setMedicalCondition] = useState('');
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -52,30 +53,32 @@ const Appointment = () => {
     if (selectedDoctor && selectedDate) {
       const fetchTimeSlots = async () => {
         try {
-          // Fetch the availability data for the selected doctor
           const { schedule } = await getDoctorAvailability(selectedDoctor);
-    
-          // Format the selectedDate to match the format in the schedule array
-          console.log(selectedDate)
           const dateStr = selectedDate.toLocaleDateString('en-CA');
-          console.log(dateStr)
-          // Find the schedule entry that matches the selectedDate
           const entry = schedule.find((item) => {
             const itemDate = new Date(item.date).toISOString().split('T')[0];
             return itemDate === dateStr;
           });
-    
-          // Set the time slots for the selected date, or an empty array if no match
-          setAvailableTimeSlots(entry ? entry.timeSlots : []);
+          let slots = entry ? entry.timeSlots : [];
+          // Filter out past time slots if selected date is today
+          const today = new Date();
+          const isToday = selectedDate.toDateString() === today.toDateString();
+          if (isToday) {
+            const nowMinutes = today.getHours() * 60 + today.getMinutes();
+            slots = slots.filter(slot => {
+              // Assume slot.time is in 'HH:mm' format
+              const [h, m] = slot.time.split(':').map(Number);
+              const slotMinutes = h * 60 + m;
+              return slotMinutes > nowMinutes;
+            });
+          }
+          setAvailableTimeSlots(slots);
         } catch (error) {
           console.error("Failed to fetch time slots", error);
-          // Optionally handle the error, e.g., set an error state
         }
       };
-    
       fetchTimeSlots();
     }
-    
   }, [selectedDoctor, selectedDate]);
 
   useEffect(() => {
@@ -112,7 +115,6 @@ const Appointment = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const dateStr = selectedDate.toLocaleDateString('en-CA');
       const lowerCaseSearchName = patientId.toLowerCase();
@@ -120,13 +122,16 @@ const Appointment = () => {
         const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
         return fullName === lowerCaseSearchName; // Exact match
       });
-
-      const appointmentData = {'patientId':patient ? patient._id : null, 'doctorId':selectedDoctor,'date':dateStr,'timeSlotId': selectedTimeSlot}
+      const appointmentData = {
+        patientId: patient ? patient._id : null,
+        doctorId: selectedDoctor,
+        date: dateStr,
+        timeSlotId: selectedTimeSlot,
+        medicalCondition: medicalCondition
+      };
       // Book the appointment
-      console.log(appointmentData)
+      console.log(appointmentData);
       const appointmentResponse = await bookAppointment(appointmentData);
-      
-
       if (appointmentResponse) {
         alert('Appointment booked successfully!');
         // Clear the form inputs by resetting the state
@@ -134,6 +139,7 @@ const Appointment = () => {
         setSelectedDoctor('');
         setSelectedDate(null);  // DatePicker expects a Date object or null
         setSelectedTimeSlot('');
+        setMedicalCondition('');
       } else {
         throw new Error('Failed to book appointment');
       }
@@ -184,7 +190,8 @@ const Appointment = () => {
           id="date"
           selected={selectedDate}
           onChange={(date) => setSelectedDate(date)}
-          includeDates={availableDates}
+          includeDates={availableDates.map(d => new Date(d))}
+          minDate={new Date()}
           dateFormat="yyyy-MM-dd"
           placeholderText="Pick a date"
         />
@@ -216,6 +223,15 @@ const Appointment = () => {
       </select>
     </div>
 
+      <div className="form-group">
+        <label htmlFor="medicalCondition">Medical Condition (Doctor's Notes):</label>
+        <textarea
+          id="medicalCondition"
+          value={medicalCondition}
+          onChange={e => setMedicalCondition(e.target.value)}
+          placeholder="Enter medical condition or notes"
+        />
+      </div>
       <button type="submit" disabled={!selectedDoctor || !selectedDate || !selectedTimeSlot}>
         Book Appointment
       </button>

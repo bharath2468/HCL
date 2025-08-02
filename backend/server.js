@@ -1,6 +1,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
+const { connectRedis } = require('./config/redis');
+const updateDoctorSchedules = require('./config/schedule');
 const authRoutes = require('./routes/authRoutes');
 const modelRoutes = require('./routes/modelRoutes')
 const cors = require('cors');
@@ -16,10 +18,15 @@ app.use(express.json()); // Parse JSON request bodies
 
 // Connect to database
 connectDB();
+// Connect to Redis
+connectRedis();
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api', modelRoutes);
+
+// Update Doctor Schedule
+updateDoctorSchedules();
 
 // Define a test route (optional)
 app.get('/', (req, res) => {

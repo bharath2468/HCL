@@ -30,6 +30,18 @@ const patientSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  medicalHistory: [
+    {
+      date: {
+        type: Date,
+        required: true
+      },
+      medicalCondition: {
+        type: String,
+        required: true
+      }
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now

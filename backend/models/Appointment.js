@@ -16,8 +16,17 @@ const appointmentSchema = new mongoose.Schema({
     required: true
   },
   timeSlot: {
-    type: String,
+    type: Object,
     required: true
+  },
+  medicalCondition: {
+    type: String,
+    default: ''
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'attended', 'closed'],
+    default: 'pending'
   },
   createdAt: {
     type: Date,

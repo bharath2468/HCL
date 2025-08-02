@@ -10,6 +10,11 @@ const timeSlotSchema = new mongoose.Schema({
     type: String,
     enum: ['Booked', 'Free', 'Holiday'],
     default: 'Free'  // Default status is 'Free'
+  },
+  appointmentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Appointment',
+    default: null
   }
 });
 
@@ -79,7 +84,8 @@ doctorSchema.pre('save', function(next) {
         const timeString = `${hour}:00`;
         timeSlots.push({
           time: timeString,
-          status: 'Free'  // Default status is 'Free'
+          status: 'Free',
+          appointmentId: null
         });
       }
 
