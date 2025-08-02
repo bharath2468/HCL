@@ -11,7 +11,7 @@
 
 3. Doctor Scheduling: Organize doctors' schedules, ensuring optimal utilization of resources and better patient care.
 
-4. Chatbot for Assistance: Integrated with a user-friendly chatbot, the system provides instant support to healthcare professionals. The chatbot is designed to clear doctors' doubts, offer quick access to medical guidelines, and facilitate communication, enhancing the overall workflow within the hospital.
+4. Chatbot for Assistance: The chatbot provides response to patient specific queries based on the patient's record using Redis for instant support to healthcare professionals. The chatbot is designed to clear doctors' doubts, offer quick access to medical guidelines, and facilitate communication, enhancing the overall workflow within the hospital.
 
 5. Role Based Access Control
 
@@ -27,13 +27,15 @@ JWT_SECRET =
 JWT_EXPIRES_IN=30d
 GEMINI_API = 
 ```
-3. Go to backend directory
-4. Run the commands
+3. Start Redis server (run `redis-server` in your terminal)
+4. Go to backend directory
+5. Run the commands
 ```node
 npm install
 npm start
 ```
-5. Go to frontend directory
+6. Go to frontend directory
+7. Run the commands
 ```node
 npm install
 npm start
@@ -46,6 +48,9 @@ npm start
 
 #### Dashboard
 ![Dashboard](screenshots/dashboard.png)
+
+#### Patient-specific Chatbot
+![Patient-specific Chatbot](screenshots/ragchatbot.png)
 
 #### Add Patient
 ![Add Patient](screenshots/newpatient.png)
